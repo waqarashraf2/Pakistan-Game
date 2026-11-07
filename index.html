@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Miracle of Pakistan - The Highway Rickshaw Adventure</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Noto+Nastaliq+Urdu:wght@700&family=Poppins:wght@600;800;900&display=swap" rel="stylesheet">
+  <!-- Three.js 3D Library & GLTF Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="game-container"></div>
+
+  <!-- Main Game HUD Overlay -->
+  <div id="hud">
+    <!-- Top Left: Stats -->
+    <div class="hud-card stat-box">
+      <div class="stat-item">
+        <span class="stat-label">SAFAR (DISTANCE)</span>
+        <span class="stat-val" id="score-val">0 <small>m</small></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">CHAI CUPS ☕</span>
+        <span class="stat-val" id="chai-val">0</span>
+      </div>
+    </div>
+
+    <!-- Top Center: Alert Banner -->
+    <div id="alert-banner" class="hidden">
+      <span id="alert-text">⚠️ WAPDA KA KHAMBA AAGE HAI! ⚠️</span>
+    </div>
+
+    <!-- Top Right: Speedometer -->
+    <div class="hud-card speed-box">
+      <div class="speed-dial">
+        <span id="speed-val">0</span>
+        <span class="speed-unit">KM/H</span>
+      </div>
+      <div class="gear-badge" id="gear-val">1st GEAR</div>
+    </div>
+  </div>
+
+  <!-- Funny Road Alerts Popup -->
+  <div id="fun-banner" class="hidden">
+    <span id="fun-text">"Dekh Magar Pyaar Se!"</span>
+  </div>
+
+  <!-- Mobile On-Screen Controls -->
+  <div id="mobile-controls">
+    <div class="touch-row">
+      <button class="touch-btn horn-btn" id="btn-horn">📢 HORN</button>
+      <button class="touch-btn brake-btn" id="btn-brake">🛑 BREAK</button>
+    </div>
+    <div class="touch-row steer-row">
+      <button class="touch-btn steer-btn" id="btn-left">⬅️ BAAYEIN (LEFT)</button>
+      <button class="touch-btn steer-btn" id="btn-right">DAAYEIN (RIGHT) ➡️</button>
+    </div>
+  </div>
+
+  <!-- Start / Intro Screen -->
+  <div id="start-screen" class="overlay-modal">
+    <div class="modal-card">
+      <div class="truck-art-border"></div>
+      <h1 class="game-title">
+        <span class="urdu-sub">معجزۂ پاکستان</span>
+        MIRACLE OF PAKISTAN
+      </h1>
+      <p class="tagline">Road Ke Beech Mein WAPDA Ka Bijli Ka Khamba!</p>
+
+      <div class="instructions-grid">
+        <div class="inst-item">
+          <span class="key-badge">A / D</span> ya <span class="key-badge">⬅️ / ➡️</span>
+          <p>Rickshaw Modne Ke Liye (Steer)</p>
+        </div>
+        <div class="inst-item">
+          <span class="key-badge">W</span> ya <span class="key-badge">⬆️</span>
+          <p>Full Speed (Race Lagao)</p>
+        </div>
+        <div class="inst-item">
+          <span class="key-badge">SPACE</span>
+          <p>Brake Dabao</p>
+        </div>
+        <div class="inst-item">
+          <span class="key-badge">H</span>
+          <p>Pakistani Pressure Horn 📢</p>
+        </div>
+      </div>
+
+      <!-- Garage: Real Pakistani Vehicle Selection -->
+      <div class="garage-selector">
+        <div class="garage-title">APNI GARI CHUNEIN (SELECT VEHICLE):</div>
+        <div class="vehicle-options">
+          <button class="veh-opt active" id="opt-rickshaw" data-veh="rickshaw">
+            <span class="veh-icon">🛺</span>
+            <span class="veh-name">TUK TUK RICKSHAW</span>
+            <small>Classic 3-Wheeler</small>
+          </button>
+          <button class="veh-opt" id="opt-cd70" data-veh="cd70">
+            <span class="veh-icon">🏍️</span>
+            <span class="veh-name">HONDA CD 70</span>
+            <small>Fast & 1-Wheeling</small>
+          </button>
+          <button class="veh-opt" id="opt-mehran" data-veh="mehran">
+            <span class="veh-icon">🚗</span>
+            <span class="veh-name">SUZUKI MEHRAN</span>
+            <small>The Boss</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="danger-warning">
+        <span class="warning-icon">⚡</span>
+        <strong>Ehtiyat:</strong> Road ke darmiyan WAPDA ke bijli ke khambon, pedestrians (paidal chalne wale) aur tez raftaar Bedford truck se bachein!
+      </div>
+
+      <button id="start-btn" class="main-action-btn">
+        <span>BISMILLAH! CHALAIN</span>
+        <small>START RICKSHAW</small>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over-screen" class="overlay-modal hidden">
+    <div class="modal-card game-over-card">
+      <div class="truck-art-border danger-border"></div>
+      <h2 class="game-over-title">OYE USTAAD KHAMBAY SE THUK GAYE! 💥</h2>
+      <p class="game-over-tagline" id="game-over-quote">"Fasla rakhein warna khamba lag jayega!"</p>
+
+      <div class="score-summary">
+        <div class="summary-box">
+          <span class="summary-lbl">KUL SAFAR</span>
+          <span class="summary-val" id="final-score">0 m</span>
+        </div>
+        <div class="summary-box">
+          <span class="summary-lbl">PIYI HUI CHAI</span>
+          <span class="summary-val" id="final-chai">0 ☕</span>
+        </div>
+        <div class="summary-box">
+          <span class="summary-lbl">RECORD HIGH</span>
+          <span class="summary-val" id="high-score">0 m</span>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="restart-btn" class="main-action-btn restart-action">
+          <span>DOBARA CHALAYEIN 🔄</span>
+          <small>TRY AGAIN</small>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound Toggle Button -->
+  <button id="sound-toggle" title="Toggle Sound">🔊</button>
+
+  <script src="audio.js"></script>
+  <script src="textures.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
